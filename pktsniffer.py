@@ -1,4 +1,5 @@
 import pyshark
+import argparse
 
 def ethernet_header(packet):
     print("Ethernet Header: ")
@@ -29,32 +30,53 @@ def icmp_header(packet):
     print(f"ICMP Destination Port: {packet.icmp.dstport}")
 
 def main():
+
+    parser = argparse.ArgumentParser(description="Analyze a .pcap file.")
+    parser.add_argument("-r", "--file", required=True, help="Path to the .pcap file")
+    parser.add_argument("-c", "--count", type=int, help="Number of packets to process. Default 10000")
+    parser.add_argument("host", "--host_address", type=str, help="Host IP address")
+    parser.add_argument("port", "--port", type=str, help="Port number")
+
+    args = parser.parse_args()
+
+    max_packets = 10000
+    if args.count:
+        max_packets = args.count
     
-    capture = pyshark.FileCapture('packetcap.pcap')
+    file = args.file
+    
+    capture = pyshark.FileCapture(file)
+
+    count = 0
 
     for packet in capture:
+        
+        count += 1
 
-        print(f"Packet {packet.number}:\n")
-        
-        # Print ethernet header
-        if 'ETH' in packet:
-            ethernet_header(packet)
-        
-        # Print IP header
-        if 'IP' in packet:
-            ip_header(packet)
-        
-        # Encapsulated packets
-        if 'TCP' in packet:
-            tcp_header(packet)
-        
-        if 'UDP' in packet:
-            udp_header(packet)
+        if count <= max_packets:
 
-        if 'ICMP' in packet:
-            icmp_header(packet)
-        
-        print("-" * 40)
+            print(f"Packet {packet.number}:\n")
+            
+            # Print ethernet header
+            if 'ETH' in packet:
+                ethernet_header(packet)
+            
+            # Print IP header
+            if 'IP' in packet:
+                ip_header(packet)
+            
+            # Encapsulated packets
+            if 'TCP' in packet:
+                tcp_header(packet)
+            
+            if 'UDP' in packet:
+                udp_header(packet)
+
+            if 'ICMP' in packet:
+                icmp_header(packet)
+            
+            print("-" * 40)
+
 
 if __name__ == "__main__":
     main()
