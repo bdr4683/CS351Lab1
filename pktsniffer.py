@@ -29,22 +29,32 @@ def icmp_header(packet):
     print(f"ICMP Source Port: {packet.icmp.srcport}")
     print(f"ICMP Destination Port: {packet.icmp.dstport}")
 
+def packet_filter(args) -> str:
+    if args.host:
+        
+
 def main():
 
     parser = argparse.ArgumentParser(description="Analyze a .pcap file.")
     parser.add_argument("-r", "--file", required=True, help="Path to the .pcap file")
     parser.add_argument("-c", "--count", type=int, help="Number of packets to process. Default 10000")
-    parser.add_argument("host", "--host_address", type=str, help="Host IP address")
-    parser.add_argument("port", "--port", type=str, help="Port number")
+    parser.add_argument("--host", help="Host IP address")
+    parser.add_argument("--port", help="Port number")
+    parser.add_argument("--ip", action="store_true", help="Filter IP protocol")
+    parser.add_argument("--tcp", action="store_true", help="Filter TCP protocol")
+    parser.add_argument("--udp", action="store_true", help="Filter UDP protocol")
+    parser.add_argument("--icmp", action="store_true", help="Filter ICMP protocol")
+
 
     args = parser.parse_args()
+
+    
 
     max_packets = 10000
     if args.count:
         max_packets = args.count
     
     file = args.file
-    
     capture = pyshark.FileCapture(file)
 
     count = 0
