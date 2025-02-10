@@ -1,6 +1,12 @@
 import pyshark
 import argparse
 
+##############################################
+#       Data Comm & Networking HW 1          #
+#         Author: Brandon Ranallo            #
+##############################################
+
+# Print ethernet header
 def ethernet_header(packet):
     print("Ethernet Header: ")
     print(f"\t-Packet Size: {packet.length}")
@@ -8,30 +14,53 @@ def ethernet_header(packet):
     print(f"\t-Destination MAC Address: {packet.eth.dst}")
     print(f"\t-Ethertype: {packet.eth.type}")
 
+# Print IP header
 def ip_header(packet):
     print("\nIP Header:")
     print(f"\t-Source IP: {packet.ip.src}")
     print(f"\t-Destination IP: {packet.ip.dst}")
     print(f"\t-Protocol: {packet.ip.proto}")
 
+# Print TCP header
 def tcp_header(packet):
     print("\nTCP Header:")
     print(f"\t-TCP Source Port: {packet.tcp.srcport}")
     print(f"\t-TCP Destination Port: {packet.tcp.dstport}")
 
+# Print UDP header
 def udp_header(packet):
     print("\nUDP Header:")
     print(f"\t-UDP Source Port: {packet.udp.srcport}")
     print(f"\t-UDP Destination Port: {packet.udp.dstport}")
 
+# Print ICMP header
 def icmp_header(packet):
     print("\nICMP Header: ")
     print(f"ICMP Source Port: {packet.icmp.srcport}")
     print(f"ICMP Destination Port: {packet.icmp.dstport}")
 
+# Create the display filter to be passed into Pyshark file capture
 def packet_filter(args) -> str:
+
+    filter_string = []
+
     if args.host:
-        
+        filter_string.append(f"ip.host == {args.host}")
+    if args.port:
+        filter_string.append(f"tcp.port == {args.port}")
+    if args.ip:
+        filter_string.append("ip")
+    if args.tcp:
+        filter_string.append("tcp")
+    if args.udp:
+        filter_string.append("udp")
+    if args.icmp:
+        filter_string.append("icmp")
+
+    connector = ' and '
+
+    return connector.join(filter_string)
+    
 
 def main():
 
@@ -53,9 +82,11 @@ def main():
     max_packets = 10000
     if args.count:
         max_packets = args.count
+
+    disp_filter = packet_filter(args)
     
     file = args.file
-    capture = pyshark.FileCapture(file)
+    capture = pyshark.FileCapture(file, display_filter=disp_filter)
 
     count = 0
 
